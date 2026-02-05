@@ -14,6 +14,7 @@ import '@/components/player/ios-fullscreen.css';
 interface IOSFullscreenVideoPlayerProps {
   src: string;
   title?: string;
+  poster?: string;
   onBack?: () => void;
   onError?: (error: string) => void;
   onSuccess?: (result: PlaybackResult) => void;
@@ -23,6 +24,7 @@ interface IOSFullscreenVideoPlayerProps {
 export function IOSFullscreenVideoPlayer({
   src,
   title = '视频',
+  poster,
   onBack,
   onError,
   onSuccess,
@@ -67,17 +69,21 @@ export function IOSFullscreenVideoPlayer({
     setIsLoading(true);
     try {
       const result = await IOSFullscreenExecutor.enterFullscreen(containerRef.current, 'native');
-      setFullscreenResult(result);
+      // 转换 FullscreenResult 为 PlaybackResult
+      const playbackResult: PlaybackResult = {
+        success: result.success,
+        method: 'native',
+        player: result.method,
+        originalUrl: src,
+        error: result.error
+      };
+      
+      setFullscreenResult(playbackResult);
       
       if (result.success) {
         setIsFullscreen(true);
         console.log('iOS全屏成功:', result.method);
-        onSuccess?.({ 
-          success: true, 
-          method: 'fullscreen',
-          player: result.method,
-          result 
-        });
+        onSuccess?.(playbackResult);
         return true;
       } else {
         throw new Error(result.error || '全屏失败');

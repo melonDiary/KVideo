@@ -122,10 +122,9 @@ export function IOSPlayerSelector({
               onClick={handleAutoPlay}
               disabled={isLoading}
               className="flex items-center gap-2"
-              size="lg"
             >
               {isLoading ? (
-                <Icons.Loader2 size={18} className="animate-spin" />
+                <Icons.RefreshCw size={18} className="animate-spin" />
               ) : (
                 <Icons.Play size={18} />
               )}
@@ -134,9 +133,8 @@ export function IOSPlayerSelector({
             
             <Button
               onClick={() => setShowPlayerChoices(!showPlayerChoices)}
-              variant="outline"
+              variant="secondary"
               className="flex items-center gap-2"
-              size="lg"
             >
               <Icons.Settings size={18} />
               选择播放器
@@ -154,7 +152,6 @@ export function IOSPlayerSelector({
               <Button
                 onClick={() => setShowPlayerChoices(false)}
                 variant="ghost"
-                size="sm"
               >
                 <Icons.X size={16} />
               </Button>
@@ -267,8 +264,7 @@ export function IOSPlayerSelector({
             </div>
             <Button
               onClick={onBackToWeb}
-              variant="outline"
-              size="sm"
+              variant="secondary"
             >
               返回网页播放器
             </Button>
@@ -303,7 +299,6 @@ export function IOSPlayerSelector({
             <Button
               onClick={() => setLastResult(null)}
               variant="ghost"
-              size="sm"
             >
               <Icons.X size={16} />
             </Button>
