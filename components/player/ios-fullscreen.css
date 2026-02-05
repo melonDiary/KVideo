@@ -1,0 +1,186 @@
+/* components/player/ios-fullscreen.css */
+
+/* iOS 真全屏优化 */
+.ios-native-fullscreen {
+  /* 移除所有默认边距和圆角 */
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  
+  /* 隐藏滚动条 */
+  overflow: hidden !important;
+  
+  /* 防止选择 */
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  
+  /* 优化触摸体验 */
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* iOS 17+ 系统UI隐藏优化 */
+@supports (showSystemUI: false) {
+  .ios-native-fullscreen {
+    /* iOS 17+ 新API优化 */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* iOS 网页全屏优化 */
+.ios-optimized-web-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  width: 100dvh !important;
+  height: 100dvh !important;
+  z-index: 2147483647 !important;
+  
+  /* iOS 安全区域处理 */
+  padding-top: env(safe-area-inset-top) !important;
+  padding-bottom: env(safe-area-inset-bottom) !important;
+  padding-left: env(safe-area-inset-left) !important;
+  padding-right: env(safe-area-inset-right) !important;
+  
+  /* 背景优化 */
+  background: #000 !important;
+  
+  /* 动画优化 */
+  transition: none !important;
+  will-change: transform !important;
+}
+
+/* 控制栏在iOS全屏中的优化 */
+.ios-native-fullscreen .video-controls {
+  position: absolute !important;
+  bottom: env(safe-area-inset-bottom) !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: linear-gradient(
+    transparent,
+    rgba(0, 0, 0, 0.8) 20px,
+    rgba(0, 0, 0, 0.9) 40px
+  ) !important;
+  
+  /* iOS 手势优化 */
+  -webkit-user-select: none !important;
+  pointer-events: auto !important;
+}
+
+/* iOS 横屏模式优化 */
+@media screen and (orientation: landscape) and (max-width: 1024px) {
+  .ios-native-fullscreen {
+    /* 横屏时充分利用空间 */
+    height: 100vh !important;
+    width: 100vw !important;
+  }
+}
+
+/* iOS 性能优化 */
+.ios-performance-mode {
+  /* 降低渲染复杂度 */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+  
+  /* 优化动画性能 */
+  will-change: auto !important;
+  contain: layout style paint !important;
+}
+
+/* 减少重绘 */
+.ios-reduced-motion {
+  transition: opacity 0.1s ease !important;
+  animation: none !important;
+}
+
+/* iOS 触摸手势优化 */
+.ios-touch-optimized {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  
+  /* 防止双击缩放 */
+  touch-action: manipulation !important;
+}
+
+/* iOS 状态栏适配 */
+.ios-statusbar-adaptation {
+  padding-top: max(20px, env(safe-area-inset-top)) !important;
+}
+
+/* iOS 全屏动画优化 */
+.ios-fullscreen-transition {
+  transition: 
+    width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+/* 加载状态优化 */
+.ios-loading-overlay {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  
+  /* iOS 加载动画 */
+  animation: ios-loading-pulse 1.5s ease-in-out infinite !important;
+}
+
+@keyframes ios-loading-pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+/* iOS 专用全屏状态指示器 */
+.ios-fullscreen-indicator {
+  position: absolute;
+  top: env(safe-area-inset-top, 20px);
+  right: env(safe-area-inset-right, 20px);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10000;
+}
+
+.ios-fullscreen-indicator.show {
+  opacity: 1;
+}
+
+/* iOS 全屏控制按钮优化 */
+.ios-fullscreen-controls {
+  /* iOS手势友好的按钮大小 */
+  min-width: 44px !important;
+  min-height: 44px !important;
+  
+  /* 触摸优化 */
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1) !important;
+  touch-action: manipulation !important;
+}
+
+/* iOS 隐藏元素但保持可访问性 */
+.ios-accessible-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}

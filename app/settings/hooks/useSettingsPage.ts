@@ -26,7 +26,7 @@ export function useSettingsPage() {
     // Display settings
     const [realtimeLatency, setRealtimeLatency] = useState(false);
     const [searchDisplayMode, setSearchDisplayMode] = useState<SearchDisplayMode>('normal');
-    const [fullscreenType, setFullscreenType] = useState<'native' | 'window'>('native');
+    const [fullscreenType, setFullscreenType] = useState<'native' | 'window' | 'auto'>('auto');
     const [proxyMode, setProxyMode] = useState<ProxyMode>('retry');
     const [rememberScrollPosition, setRememberScrollPosition] = useState(true);
 
@@ -285,7 +285,7 @@ export function useSettingsPage() {
         });
     };
 
-    const handleFullscreenTypeChange = (type: 'native' | 'window') => {
+    const handleFullscreenTypeChange = (type: 'native' | 'window' | 'auto') => {
         setFullscreenType(type);
         const currentSettings = settingsStore.getSettings();
         settingsStore.saveSettings({

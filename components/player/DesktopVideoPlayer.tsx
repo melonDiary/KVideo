@@ -10,7 +10,9 @@ import { DesktopControlsWrapper } from './desktop/DesktopControlsWrapper';
 import { DesktopOverlayWrapper } from './desktop/DesktopOverlayWrapper';
 import { usePlayerSettings } from './hooks/usePlayerSettings';
 import { useIsIOS } from '@/lib/hooks/mobile/useDeviceDetection';
+import { useIOSFullscreenDetector } from '@/lib/utils/ios-fullscreen-detector';
 import './web-fullscreen.css';
+import './ios-fullscreen.css';
 
 interface DesktopVideoPlayerProps {
   src: string;
@@ -62,10 +64,11 @@ export function DesktopVideoPlayer({
     };
   }, []);
 
-  // Force windowed fullscreen on iOS to avoid native player hijacking
-  const fullscreenType = isIOS ? 'window' : settingsFullscreenType;
+  // 支持iOS真全屏，不再强制网页全屏
+  const fullscreenType = settingsFullscreenType;
+  const iosInfo = useIOSFullscreenDetector();
 
-  // Check if we need to force landscape (iOS + Fullscreen + Portrait)
+  // 检查是否需要强制横屏 (iOS + 网页全屏 + 竖屏)
   const shouldForceLandscape = data.isFullscreen && fullscreenType === 'window' && isIOS && !isLandscape;
 
   // Initialize HLS Player
@@ -146,8 +149,20 @@ export function DesktopVideoPlayer({
   return (
     <div
       ref={containerRef}
-      className={`kvideo-container relative aspect-video bg-black rounded-[var(--radius-2xl)] group ${data.isFullscreen && fullscreenType === 'window' ? 'is-web-fullscreen' : ''
-        } ${shouldForceLandscape ? 'force-landscape' : ''}`}
+      className={[
+        'kvideo-container relative aspect-video bg-black rounded-[var(--radius-2xl)] group',
+        // 网页全屏状态
+        data.isFullscreen && fullscreenType === 'window' ? 'is-web-fullscreen' : '',
+        // iOS 网页全屏优化
+        data.isFullscreen && fullscreenType === 'window' && isIOS ? 'ios-optimized-web-fullscreen' : '',
+        // iOS 真全屏优化
+        data.isFullscreen && fullscreenType === 'native' && iosInfo.isIOS ? 'ios-native-fullscreen' : '',
+        // iOS 性能模式
+        iosInfo.isIOS ? 'ios-performance-mode' : '',
+        // iOS 触摸优化
+        isIOS ? 'ios-touch-optimized' : '',
+        shouldForceLandscape ? 'force-landscape' : ''
+      ].filter(Boolean).join(' ')}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >

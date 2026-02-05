@@ -3,7 +3,7 @@ import { usePlaybackControls } from './desktop/usePlaybackControls';
 import { useVolumeControls } from './desktop/useVolumeControls';
 import { useProgressControls } from './desktop/useProgressControls';
 import { useSkipControls } from './desktop/useSkipControls';
-import { useFullscreenControls } from './desktop/useFullscreenControls';
+import { useEnhancedFullscreenControls } from './desktop/useEnhancedFullscreenControls';
 import { useControlsVisibility } from './desktop/useControlsVisibility';
 import { useUtilities } from './desktop/useUtilities';
 import { useDesktopShortcuts } from './desktop/useDesktopShortcuts';
@@ -22,7 +22,7 @@ interface UseDesktopPlayerLogicProps {
     refs: DesktopPlayerState['refs'];
     data: DesktopPlayerState['data'];
     actions: DesktopPlayerState['actions'];
-    fullscreenType?: 'native' | 'window';
+    fullscreenType?: 'native' | 'window' | 'auto';
     isForceLandscape?: boolean;
 }
 
@@ -120,10 +120,11 @@ export function useDesktopPlayerLogic({
         skipForwardTimeoutRef, skipBackwardTimeoutRef
     });
 
-    const fullscreenControls = useFullscreenControls({
+    const fullscreenControls = useEnhancedFullscreenControls({
         containerRef, videoRef, isFullscreen, setIsFullscreen,
         isPiPSupported, isAirPlaySupported, setIsPiPSupported, setIsAirPlaySupported,
-        fullscreenType
+        fullscreenType,
+        enableIOSOptimizations: true
     });
 
     const controlsVisibility = useControlsVisibility({
