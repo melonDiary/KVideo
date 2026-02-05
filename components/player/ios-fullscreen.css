@@ -1,7 +1,17 @@
 /* components/player/ios-fullscreen.css */
 
-/* iOS 真全屏优化 */
+/* iOS 真全屏优化 - 覆盖整个屏幕 */
 .ios-native-fullscreen {
+  /* 确保覆盖整个屏幕 */
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  width: 100dvh !important;
+  height: 100dvh !important;
+  z-index: 2147483647 !important;
+  
   /* 移除所有默认边距和圆角 */
   border-radius: 0 !important;
   margin: 0 !important;
@@ -17,14 +27,48 @@
   /* 优化触摸体验 */
   -webkit-touch-callout: none !important;
   -webkit-tap-highlight-color: transparent !important;
+  
+  /* 背景色优化 */
+  background: #000 !important;
+  
+  /* iOS 安全区域处理 */
+  padding-top: env(safe-area-inset-top, 0) !important;
+  padding-bottom: env(safe-area-inset-bottom, 0) !important;
+  padding-left: env(safe-area-inset-left, 0) !important;
+  padding-right: env(safe-area-inset-right, 0) !important;
 }
 
 /* iOS 17+ 系统UI隐藏优化 */
 @supports (showSystemUI: false) {
   .ios-native-fullscreen {
-    /* iOS 17+ 新API优化 */
+    /* iOS 17+ 新API优化 - 完全隐藏系统UI */
+    --system-ui-opacity: 0;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+  }
+  
+  /* iOS 17+ 状态栏隐藏 */
+  .ios-native-fullscreen::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-top, 44px);
+    background: #000;
+    z-index: -1;
+  }
+  
+  /* iOS 17+ Home Indicator 隐藏 */
+  .ios-native-fullscreen::after {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: env(safe-area-inset-bottom, 34px);
+    background: #000;
+    z-index: -1;
   }
 }
 
@@ -170,6 +214,66 @@
   /* 触摸优化 */
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1) !important;
   touch-action: manipulation !important;
+  
+  /* 背景模糊效果 */
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* iOS 全屏状态指示器增强 */
+.ios-fullscreen-indicator {
+  position: absolute;
+  top: env(safe-area-inset-top, 20px);
+  right: env(safe-area-inset-right, 20px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.ios-fullscreen-indicator.show {
+  opacity: 1;
+}
+
+/* iOS 全屏加载覆盖层 */
+.ios-loading-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10001 !important;
+}
+
+/* iOS 全屏性能优化 */
+.ios-performance-mode {
+  /* 降低渲染复杂度 */
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+  
+  /* 优化动画性能 */
+  will-change: auto !important;
+  contain: layout style paint !important;
+  
+  /* 防止重绘 */
+  contain: strict !important;
 }
 
 /* iOS 隐藏元素但保持可访问性 */

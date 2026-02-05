@@ -12,7 +12,6 @@ import { usePlayerSettings } from './hooks/usePlayerSettings';
 import { useIsIOS } from '@/lib/hooks/mobile/useDeviceDetection';
 import { useIOSFullscreenDetector } from '@/lib/utils/ios-fullscreen-detector';
 import './web-fullscreen.css';
-import './ios-fullscreen.css';
 
 interface DesktopVideoPlayerProps {
   src: string;

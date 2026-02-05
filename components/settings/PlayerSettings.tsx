@@ -6,8 +6,7 @@
  */
 
 import { Icons } from '@/components/ui/Icon';
-import type { ProxyMode } from '@/lib/store/settings-store';
-
+import type { ProxyMode, IOSPlayerMode } from '@/lib/store/settings-store';
 import { useIOSFullscreenDetector } from '@/lib/utils/ios-fullscreen-detector';
 
 interface PlayerSettingsProps {
@@ -15,6 +14,8 @@ interface PlayerSettingsProps {
     onFullscreenTypeChange: (type: 'native' | 'window' | 'auto') => void;
     proxyMode: ProxyMode;
     onProxyModeChange: (mode: ProxyMode) => void;
+    iosPlayerMode: IOSPlayerMode;
+    onIOSPlayerModeChange: (mode: IOSPlayerMode) => void;
 }
 
 export function PlayerSettings({
@@ -22,6 +23,8 @@ export function PlayerSettings({
     onFullscreenTypeChange,
     proxyMode,
     onProxyModeChange,
+    iosPlayerMode,
+    onIOSPlayerModeChange,
 }: PlayerSettingsProps) {
     const iosInfo = useIOSFullscreenDetector();
     
@@ -187,6 +190,91 @@ export function PlayerSettings({
                             <div className="font-semibold">总是代理</div>
                             <div className="text-sm opacity-80 mt-1">所有请求都通过代理转发</div>
                         </button>
+                    </div>
+                </div>
+
+                {/* iOS播放器设置 */}
+                <div className="border-t border-[var(--glass-border)]" />
+                <div>
+                    <h3 className="font-medium text-[var(--text-color)] mb-2 inline-flex items-center gap-2">
+                        <span className="text-[var(--accent-color)]">📱</span>
+                        iOS播放器设置
+                    </h3>
+                    <p className="text-sm text-[var(--text-color-secondary)] mb-4">
+                        配置iOS设备上的播放器偏好设置
+                    </p>
+                    <div className="space-y-6">
+                        {/* iOS播放器模式 */}
+                        <div>
+                            <div className="font-medium text-[var(--text-color)] mb-3">默认播放器模式</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                <button
+                                    onClick={() => onIOSPlayerModeChange('auto')}
+                                    className={`px-4 py-3 rounded-[var(--radius-2xl)] border text-left font-medium transition-all duration-200 cursor-pointer ${iosPlayerMode === 'auto'
+                                        ? 'bg-[var(--accent-color)] border-[var(--accent-color)] text-white shadow-[0_4px_12px_rgba(var(--accent-color-rgb),0.3)]'
+                                        : 'bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-color)] hover:bg-[color-mix(in_srgb,var(--accent-color)_10%,transparent)]'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span>🤖</span>
+                                        <div className="font-semibold">智能</div>
+                                    </div>
+                                    <div className="text-sm opacity-80 mt-1">自动选择最佳播放器</div>
+                                </button>
+                                <button
+                                    onClick={() => onIOSPlayerModeChange('system')}
+                                    className={`px-4 py-3 rounded-[var(--radius-2xl)] border text-left font-medium transition-all duration-200 cursor-pointer ${iosPlayerMode === 'system'
+                                        ? 'bg-[var(--accent-color)] border-[var(--accent-color)] text-white shadow-[0_4px_12px_rgba(var(--accent-color-rgb),0.3)]'
+                                        : 'bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-color)] hover:bg-[color-mix(in_srgb,var(--accent-color)_10%,transparent)]'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span>🖥️</span>
+                                        <div className="font-semibold">系统</div>
+                                    </div>
+                                    <div className="text-sm opacity-80 mt-1">使用iOS原生播放器</div>
+                                </button>
+                                <button
+                                    onClick={() => onIOSPlayerModeChange('safari')}
+                                    className={`px-4 py-3 rounded-[var(--radius-2xl)] border text-left font-medium transition-all duration-200 cursor-pointer ${iosPlayerMode === 'safari'
+                                        ? 'bg-[var(--accent-color)] border-[var(--accent-color)] text-white shadow-[0_4px_12px_rgba(var(--accent-color-rgb),0.3)]'
+                                        : 'bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-color)] hover:bg-[color-mix(in_srgb,var(--accent-color)_10%,transparent)]'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span>🌐</span>
+                                        <div className="font-semibold">Safari</div>
+                                    </div>
+                                    <div className="text-sm opacity-80 mt-1">在Safari中播放</div>
+                                </button>
+                                <button
+                                    onClick={() => onIOSPlayerModeChange('youtube')}
+                                    className={`px-4 py-3 rounded-[var(--radius-2xl)] border text-left font-medium transition-all duration-200 cursor-pointer ${iosPlayerMode === 'youtube'
+                                        ? 'bg-[var(--accent-color)] border-[var(--accent-color)] text-white shadow-[0_4px_12px_rgba(var(--accent-color-rgb),0.3)]'
+                                        : 'bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-color)] hover:bg-[color-mix(in_srgb,var(--accent-color)_10%,transparent)]'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span>📺</span>
+                                        <div className="font-semibold">YouTube</div>
+                                    </div>
+                                    <div className="text-sm opacity-80 mt-1">跳转到YouTube</div>
+                                </button>
+                                <button
+                                    onClick={() => onIOSPlayerModeChange('vlc')}
+                                    className={`px-4 py-3 rounded-[var(--radius-2xl)] border text-left font-medium transition-all duration-200 cursor-pointer ${iosPlayerMode === 'vlc'
+                                        ? 'bg-[var(--accent-color)] border-[var(--accent-color)] text-white shadow-[0_4px_12px_rgba(var(--accent-color-rgb),0.3)]'
+                                        : 'bg-[var(--glass-bg)] border-[var(--glass-border)] text-[var(--text-color)] hover:bg-[color-mix(in_srgb,var(--accent-color)_10%,transparent)]'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span>🎬</span>
+                                        <div className="font-semibold">VLC</div>
+                                    </div>
+                                    <div className="text-sm opacity-80 mt-1">使用VLC播放器</div>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

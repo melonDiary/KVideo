@@ -6,8 +6,12 @@ import { Card } from '@/components/ui/Card';
 import { useHistory } from '@/lib/store/history-store';
 import { settingsStore } from '@/lib/store/settings-store';
 import { CustomVideoPlayer } from './CustomVideoPlayer';
+import { IOSFullscreenVideoPlayer } from './IOSFullscreenVideoPlayer';
 import { VideoPlayerError } from './VideoPlayerError';
 import { VideoPlayerEmpty } from './VideoPlayerEmpty';
+import { useDeviceDetector } from '@/lib/utils/device-detector';
+import { iosVideoPlayer } from '@/lib/ios/iosVideoPlayer';
+import type { PlaybackResult } from '@/lib/ios/types';
 
 interface VideoPlayerProps {
   playUrl: string;
@@ -35,6 +39,8 @@ export function VideoPlayer({
   const [useProxy, setUseProxy] = useState(false);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+  const [settings, setSettings] = useState(settingsStore.getSettings());
+  const deviceInfo = useDeviceDetector();
   const MAX_MANUAL_RETRIES = 20;
   const lastSaveTimeRef = useRef(0);
   const currentTimeRef = useRef(0);
@@ -42,19 +48,20 @@ export function VideoPlayer({
   const SAVE_INTERVAL = 5000; // 5 seconds throttle
 
   // Get showModeIndicator setting
-  // Get showModeIndicator and proxyMode settings
   const [showModeIndicator, setShowModeIndicator] = useState(false);
   const [proxyMode, setProxyMode] = useState<'retry' | 'none' | 'always'>('retry');
 
   useEffect(() => {
     // Initial value
-    const settings = settingsStore.getSettings();
-    setShowModeIndicator(settings.showModeIndicator);
-    setProxyMode(settings.proxyMode);
+    const currentSettings = settingsStore.getSettings();
+    setSettings(currentSettings);
+    setShowModeIndicator(currentSettings.showModeIndicator);
+    setProxyMode(currentSettings.proxyMode);
 
     // Subscribe to changes
     const unsubscribe = settingsStore.subscribe(() => {
       const newSettings = settingsStore.getSettings();
+      setSettings(newSettings);
       setShowModeIndicator(newSettings.showModeIndicator);
       setProxyMode(newSettings.proxyMode);
     });
@@ -63,19 +70,15 @@ export function VideoPlayer({
   }, []);
 
   // Initialize useProxy based on proxyMode when the component mounts or proxyMode changes
-  // We use a separate effect for this to react to setting changes
   useEffect(() => {
     if (proxyMode === 'always') {
       setUseProxy(true);
     } else if (proxyMode === 'none') {
       setUseProxy(false);
     }
-    // For 'retry', we assume it starts as false (direct), which is the default state of useProxy
   }, [proxyMode]);
 
-
   // Use reactive hook to subscribe to history updates
-  // This ensures the component re-renders when history is hydrated from localStorage
   const { viewingHistory, addToHistory } = useHistory(isPremium);
   const searchParams = useSearchParams();
 
@@ -87,9 +90,6 @@ export function VideoPlayer({
   const getSavedProgress = () => {
     if (!videoId) return 0;
 
-    // Directly check HistoryStore for progress
-    // We prioritize a strict match (including source), but fall back to any match for this video/episode
-    // This fixes issues where the source parameter might be missing or different
     const historyItem = viewingHistory.find(item =>
       item.videoId.toString() === videoId?.toString() &&
       item.episodeIndex === currentEpisode &&
@@ -127,7 +127,6 @@ export function VideoPlayer({
     if (!videoId || !playUrl || duration === 0) return;
 
     const now = Date.now();
-    // Only save if enough time has passed since last save
     if (currentTime > 1 && now - lastSaveTimeRef.current >= SAVE_INTERVAL) {
       lastSaveTimeRef.current = now;
       saveProgress(currentTime, duration);
@@ -137,7 +136,6 @@ export function VideoPlayer({
   // Save on page leave/refresh
   useEffect(() => {
     const handleBeforeUnload = () => {
-      // Save current progress before leaving
       if (currentTimeRef.current > 1 && durationRef.current > 0) {
         saveProgress(currentTimeRef.current, durationRef.current);
       }
@@ -151,15 +149,9 @@ export function VideoPlayer({
   const handleVideoError = (error: string) => {
     console.error('Video playback error:', error);
 
-    // Auto-retry with proxy if:
-    // 1. Not already using proxy
-    // 2. Proxy mode is NOT 'none' (so 'retry' or potentially 'always' if it somehow failed locally)
-    // 3. Proxy mode is 'retry' (specifically for the auto-switch logic)
-    // Note: If mode is 'always', we are already using proxy. If it fails, we show error.
-
     if (!useProxy && proxyMode === 'retry') {
       setUseProxy(true);
-      setShouldAutoPlay(true); // Force autoplay after proxy retry
+      setShouldAutoPlay(true);
       setVideoError('');
       return;
     }
@@ -173,22 +165,32 @@ export function VideoPlayer({
     setRetryCount(prev => prev + 1);
     setVideoError('');
     setShouldAutoPlay(true);
-    // Toggle proxy to try different path, but since we are already in error state which likely means proxy failed (or direct failed),
-    // we can try toggling or just force re-render.
-    // Requirement says: "try without proxy and proxy and same as before"
-    // We will just toggle useProxy state to force a refresh with/without proxy.
-    // However, if we want to cycle, we can just toggle.
-    // But the requirement says "proxy attempt count to 20".
-    // So we just increment count and maybe toggle proxy or keep it.
-    // Let's toggle it to give best chance.
-    // Actually requirement says "try no proxy and proxy and same as before".
-    // So simple toggle is fine.
     setUseProxy(prev => !prev);
   };
 
+  // 处理iOS播放器成功/失败
+  const handleIOSPlaySuccess = (result: PlaybackResult) => {
+    console.log('iOS播放器成功启动:', result);
+    // iOS播放器启动成功，不需要显示错误
+    // 可以在这里添加成功提示
+  };
+
+  const handleIOSPlayError = (error: string) => {
+    console.warn('iOS播放器启动失败:', error);
+    // iOS播放器失败时，回退到网页播放器
+    setVideoError(error);
+  };
+
   const finalPlayUrl = useProxy || proxyMode === 'always'
-    ? `/api/proxy?url=${encodeURIComponent(playUrl)}&retry=${retryCount}` // Add retry param to force fresh request
+    ? `/api/proxy?url=${encodeURIComponent(playUrl)}&retry=${retryCount}`
     : playUrl;
+
+  // 决定使用哪种播放器
+  const shouldUseIOSPlayer = deviceInfo.isIOS && (
+    settings.preferSystemPlayer || 
+    deviceInfo.isMobile || 
+    settings.iosPlayerMode !== 'auto'
+  );
 
   if (!playUrl) {
     return <VideoPlayerEmpty />;
@@ -196,7 +198,7 @@ export function VideoPlayer({
 
   return (
     <Card hover={false} className="p-0 relative">
-      {/* Mode Indicator Badge - controlled by settings */}
+      {/* Mode Indicator Badge */}
       {showModeIndicator && (
         <div className="absolute top-3 right-3 z-30">
           <span className={`px-2 py-1 text-xs font-medium rounded-full backdrop-blur-md transition-all duration-300 ${useProxy
@@ -207,6 +209,7 @@ export function VideoPlayer({
           </span>
         </div>
       )}
+      
       {videoError ? (
         <VideoPlayerError
           error={videoError}
@@ -215,10 +218,26 @@ export function VideoPlayer({
           retryCount={retryCount}
           maxRetries={MAX_MANUAL_RETRIES}
         />
-      ) : (
-        <CustomVideoPlayer
-          key={`${useProxy ? 'proxy' : 'direct'}-${retryCount}-${source}`} // Remount when switching sources, modes, or retrying
+      ) : shouldUseIOSPlayer ? (
+        // 使用iOS全屏播放器
+        <IOSFullscreenVideoPlayer
           src={finalPlayUrl}
+          title={title}
+          onBack={onBack}
+          onSuccess={handleIOSPlaySuccess}
+          onError={handleIOSPlayError}
+          options={{
+            preferredPlayer: settings.iosPlayerMode,
+            enableNativeControls: true,
+            allowExternalPlayer: true
+          }}
+        />
+      ) : (
+        // 使用网页播放器
+        <CustomVideoPlayer
+          key={`${useProxy ? 'proxy' : 'direct'}-${retryCount}-${source}`}
+          src={finalPlayUrl}
+          title={title}
           onError={handleVideoError}
           onTimeUpdate={handleTimeUpdate}
           initialTime={getSavedProgress()}

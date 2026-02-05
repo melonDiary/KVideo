@@ -57,7 +57,7 @@ export default function SettingsPage() {
     handleFullscreenTypeChange,
     proxyMode,
     handleProxyModeChange,
-    rememberScrollPosition,
+        iosPlayerMode,    rememberScrollPosition,
     handleRememberScrollPositionChange,
   } = useSettingsPage();
 
@@ -73,7 +73,8 @@ export default function SettingsPage() {
           onFullscreenTypeChange={handleFullscreenTypeChange}
           proxyMode={proxyMode}
           onProxyModeChange={handleProxyModeChange}
-        />
+          iosPlayerMode={iosPlayerMode}
+          onIOSPlayerModeChange={handleIOSPlayerModeChange}        />
 
         {/* Password Settings */}
         <PasswordSettings

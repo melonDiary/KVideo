@@ -20,7 +20,7 @@ export type SortOption =
 export type SearchDisplayMode = 'normal' | 'grouped';
 export type AdFilterMode = 'off' | 'keyword' | 'heuristic' | 'aggressive';
 export type ProxyMode = 'retry' | 'none' | 'always';
-
+export type IOSPlayerMode = "auto" | "system" | "safari" | "vlc" | "youtube";
 export interface AppSettings {
   sources: VideoSource[];
   premiumSources: VideoSource[];
@@ -44,6 +44,8 @@ export interface AppSettings {
   realtimeLatency: boolean; // Enable real-time latency ping updates
   searchDisplayMode: SearchDisplayMode; // 'normal' = individual cards, 'grouped' = group same-name videos
   episodeReverseOrder: boolean; // Persist episode list reverse state
+  iosPlayerMode: IOSPlayerMode; // iOS系统播放器模式偏好
+  preferSystemPlayer: boolean; // 是否优先使用系统播放器
   fullscreenType: 'native' | 'window' | 'auto'; // Fullscreen mode preference
   proxyMode: ProxyMode; // Proxy behavior: 'retry' | 'none' | 'always'
   rememberScrollPosition: boolean; // Remember scroll position when navigating back or refreshing
@@ -121,7 +123,8 @@ function getDefaultAppSettings(): AppSettings {
     fullscreenType: 'auto',
     proxyMode: 'retry',
     rememberScrollPosition: true,
-  };
+    iosPlayerMode: "auto",
+    preferSystemPlayer: false,  };
 }
 
 export const settingsStore = {
@@ -201,6 +204,8 @@ export const settingsStore = {
           : 'auto',
         proxyMode: (parsed.proxyMode === 'retry' || parsed.proxyMode === 'none' || parsed.proxyMode === 'always') ? parsed.proxyMode : 'retry',
         rememberScrollPosition: parsed.rememberScrollPosition !== undefined ? parsed.rememberScrollPosition : true,
+        iosPlayerMode: (parsed.iosPlayerMode === "system" || parsed.iosPlayerMode === "safari" || parsed.iosPlayerMode === "vlc" || parsed.iosPlayerMode === "youtube") ? parsed.iosPlayerMode : "auto",
+        preferSystemPlayer: parsed.preferSystemPlayer !== undefined ? parsed.preferSystemPlayer : false,
       };
     } catch {
       // Even if localStorage fails, we should return defaults + ENV subscriptions

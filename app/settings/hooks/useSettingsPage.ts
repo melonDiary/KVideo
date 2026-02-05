@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { settingsStore, getDefaultSources, type SortOption, type SearchDisplayMode, type ProxyMode } from '@/lib/store/settings-store';
-import type { VideoSource, SourceSubscription } from '@/lib/types';
+import type { IOSPlayerMode } from "@/lib/store/settings-store";import type { VideoSource, SourceSubscription } from '@/lib/types';
 import {
     type ImportResult,
     mergeSources,
@@ -28,7 +28,7 @@ export function useSettingsPage() {
     const [searchDisplayMode, setSearchDisplayMode] = useState<SearchDisplayMode>('normal');
     const [fullscreenType, setFullscreenType] = useState<'native' | 'window' | 'auto'>('auto');
     const [proxyMode, setProxyMode] = useState<ProxyMode>('retry');
-    const [rememberScrollPosition, setRememberScrollPosition] = useState(true);
+    const [iosPlayerMode, setIOSPlayerMode] = useState<IOSPlayerMode>("auto");    const [rememberScrollPosition, setRememberScrollPosition] = useState(true);
 
     useEffect(() => {
         const settings = settingsStore.getSettings();
@@ -42,7 +42,7 @@ export function useSettingsPage() {
         setFullscreenType(settings.fullscreenType);
         setProxyMode(settings.proxyMode);
         setRememberScrollPosition(settings.rememberScrollPosition);
-
+        setIOSPlayerMode(settings.iosPlayerMode);
         // Fetch env password status
         fetch('/api/config')
             .then(res => res.json())
@@ -312,6 +312,14 @@ export function useSettingsPage() {
         });
     };
 
+    const handleIOSPlayerModeChange = (mode: IOSPlayerMode) => {
+        setIOSPlayerMode(mode);
+        const currentSettings = settingsStore.getSettings();
+        settingsStore.saveSettings({
+            ...currentSettings,
+            iosPlayerMode: mode,
+        });
+    };
     const handleRestoreDefaults = () => {
         const defaults = getDefaultSources();
         handleSourcesChange(defaults);
@@ -366,7 +374,8 @@ export function useSettingsPage() {
         handleFullscreenTypeChange,
         proxyMode,
         handleProxyModeChange,
-        rememberScrollPosition,
+        iosPlayerMode,
+        handleIOSPlayerModeChange,        rememberScrollPosition,
         handleRememberScrollPositionChange,
     };
 }
