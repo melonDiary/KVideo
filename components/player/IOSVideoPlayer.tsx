@@ -52,7 +52,7 @@ export function IOSVideoPlayer({
       <Card className={`p-6 text-center ${className}`}>
         <div className="flex flex-col items-center gap-4">
           <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center">
-            <Icons.AlertCircle size={32} className="text-orange-400" />
+            <Icons.AlertTriangle size={32} className="text-orange-400" />
           </div>
           <div>
             <h3 className="text-lg font-semibold text-orange-400 mb-2">非iOS设备</h3>
