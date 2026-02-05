@@ -57,7 +57,9 @@ export default function SettingsPage() {
     handleFullscreenTypeChange,
     proxyMode,
     handleProxyModeChange,
-        iosPlayerMode,    rememberScrollPosition,
+    iosPlayerMode,
+    handleIOSPlayerModeChange,
+    rememberScrollPosition,
     handleRememberScrollPositionChange,
   } = useSettingsPage();
 
