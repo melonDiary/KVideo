@@ -5,6 +5,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { iosVideoPlayer } from './iosVideoPlayer';
+import type { DeviceCapabilities, PlaybackResult, VideoPlayerOptions } from './types';
 
 // React Hook for iOS Video Player
 export function useIOSVideoPlayer() {

@@ -12,8 +12,8 @@ import {
   IOSPlayerStatus,
   BatchVideoPlayer,
   VideoPlayerSelector
-} from '../../lib/ios/iosVideoPlayer';
-import type { VideoPlayerOptions } from '../../lib/ios/iosVideoPlayer';
+} from '../../lib/ios/react-components';
+import type { VideoPlayerOptions } from '../../lib/ios/types';
 
 export default function IOSDemoPage() {
   const { capabilities, isPlaying, lastResult, playVideo } = useIOSVideoPlayer();
@@ -23,17 +23,17 @@ export default function IOSDemoPage() {
     {
       url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
       title: '大雄兔 (MP4)',
-      options: { preferredPlayer: 'system' }
+      options: { preferredPlayer: 'system' as const }
     },
     {
       url: 'https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8',
       title: '钢铁之泪 (HLS直播流)',
-      options: { preferredPlayer: 'system' }
+      options: { preferredPlayer: 'system' as const }
     },
     {
       url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
       title: 'YouTube视频示例',
-      options: { preferredPlayer: 'youtube' }
+      options: { preferredPlayer: 'youtube' as const }
     }
   ]);
 
@@ -124,7 +124,7 @@ export default function IOSDemoPage() {
                 <h3 className="text-lg font-semibold text-white mb-4">播放器选择器</h3>
                 <VideoPlayerSelector
                   videoUrl={selectedVideo}
-                  onPlayerSelected={(player, result) => {
+                  onPlayerSelected={(player: string, result: any) => {
                     console.log('播放器选择:', player, result);
                   }}
                 />

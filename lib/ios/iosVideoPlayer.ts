@@ -13,6 +13,23 @@ import type {
   DeviceCapabilities
 } from './types';
 
+// 重新导出所有React组件和Hook
+export {
+  useIOSVideoPlayer,
+  IOSVideoPlayerButton,
+  IOSPlayerStatus,
+  BatchVideoPlayer,
+  VideoPlayerSelector
+} from './react-components';
+
+// 导出类型
+export type {
+  VideoPlayerOptions,
+  VideoInfo,
+  PlaybackResult,
+  DeviceCapabilities
+};
+
 /**
  * iOS视频播放器管理器
  */
@@ -310,7 +327,7 @@ export class IOSVideoPlayer {
   private shouldUseThirdPartyPlayer(videoInfo: VideoInfo): boolean {
     const largeFormats = ['mkv', 'avi', 'wmv', 'flv'];
     return (videoInfo.extension && largeFormats.includes(videoInfo.extension)) ||
-           (videoInfo.size && videoInfo.size > 500 * 1024 * 1024); // > 500MB
+           (videoInfo.size !== undefined && videoInfo.size > 500 * 1024 * 1024); // > 500MB
   }
 
   /**
@@ -339,8 +356,8 @@ export class IOSVideoPlayer {
   private async launchSystemPlayer(url: string): Promise<PlaybackResult> {
     try {
       // 尝试使用WKWebView桥接
-      if (this.capabilities?.hasWKWebView && window.webkit?.messageHandlers?.player) {
-        window.webkit.messageHandlers.player.postMessage({
+      if (this.capabilities?.hasWKWebView && (window as any).webkit?.messageHandlers?.player) {
+        (window as any).webkit.messageHandlers.player.postMessage({
           action: 'play',
           url: url,
           options: { useNativePlayer: true }
