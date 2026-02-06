@@ -148,7 +148,7 @@ export function IOSVideoPlayer({
           </div>
           <h2 className="text-xl font-semibold text-white mb-2">iOS系统播放器</h2>
           <p className="text-sm text-muted-foreground">
-            为您的{iOSVersionText}设备优化的播放器
+            为您的{getiOSVersionText()}设备优化的播放器
           </p>
         </div>
 
