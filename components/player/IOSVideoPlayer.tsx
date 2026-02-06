@@ -226,7 +226,7 @@ export function IOSVideoPlayer({
                   </div>
                   {isLoading && (
                     <div className="animate-spin">
-                      <Icons.Loader2 size={20} />
+                      <Icons.RefreshCw size={20} />
                     </div>
                   )}
                 </div>
