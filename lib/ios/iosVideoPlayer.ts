@@ -77,6 +77,20 @@ export class IOSVideoPlayer {
   }
 
   /**
+   * 检测是否为iOS 17或更高版本
+   */
+  private isIOS17OrAbove(): boolean {
+    const iOSVersion = this.getiOSVersion();
+    if (!iOSVersion) return false;
+    
+    const versionParts = iOSVersion.split('.');
+    const majorVersion = parseInt(versionParts[0]);
+    
+    // iOS 17+ 版本号 >= 17
+    return majorVersion >= 17;
+  }
+
+  /**
    * 检测是否为iPad
    */
   private isIPad(): boolean {
@@ -304,8 +318,10 @@ export class IOSVideoPlayer {
       return options.allowExternalPlayer ? 'vlc' : 'system';
     }
 
-    // 默认选择网页播放器而不是系统播放器
-    return 'web';
+    // 默认选择：根据iOS版本决定
+    // iOS 17+：推荐网页播放器（新功能）
+    // iOS 16.x及以下：推荐系统播放器（兼容性）
+    return this.isIOS17OrAbove() ? 'web' : 'system';
   }
 
   /**
@@ -673,19 +689,24 @@ export class IOSVideoPlayer {
    */
   getRecommendedPlayer(videoUrl: string): string {
     const extension = new URL(videoUrl).pathname.split('.').pop()?.toLowerCase();
+    const isNewIOS = this.isIOS17OrAbove();
     
     switch (extension) {
       case 'm3u8':
-        return this.capabilities?.hasNativeHLS ? 'system' : 'web';
+        // HLS流媒体：iOS 17+推荐网页播放器，老版本推荐系统播放器
+        return isNewIOS ? (this.capabilities?.hasNativeHLS ? 'system' : 'web') : 'system';
       case 'mp4':
       case 'mov':
       case 'm4v':
-        return 'web'; // 默认使用网页播放器
+        // 常规视频格式：iOS 17+推荐网页播放器，老版本推荐系统播放器
+        return isNewIOS ? 'web' : 'system';
       case 'mkv':
       case 'avi':
+        // 特殊格式：都推荐VLC播放器
         return 'vlc';
       default:
-        return 'web';
+        // 其他格式：iOS 17+推荐网页播放器，老版本推荐Safari
+        return isNewIOS ? 'web' : 'safari';
     }
   }
 }

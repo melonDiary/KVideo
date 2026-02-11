@@ -28,13 +28,33 @@ export default function TestIOSWebPlayer() {
   return (
     <div className="min-h-screen bg-black text-white p-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">iOS网页播放器测试</h1>
+        <h1 className="text-3xl font-bold mb-6">iOS网页播放器测试 (修复版)</h1>
         
+        {/* 修复信息展示 */}
+        <div className="mb-6 p-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-lg">
+          <h2 className="text-lg font-semibold mb-2 text-green-400">🔧 iOS 16.3.1 播放修复</h2>
+          <p className="text-sm text-gray-300">
+            • iOS 17+: 默认网页播放器（支持新功能）<br/>
+            • iOS 16.x及以下: 默认系统播放器（优先兼容）<br/>
+            • 智能版本检测，自动选择最佳策略
+          </p>
+        </div>
+
         <div className="mb-6 p-4 bg-gray-800 rounded-lg">
           <h2 className="text-lg font-semibold mb-2">设备信息</h2>
           <p>iOS设备: {deviceInfo.isIOS ? '是' : '否'}</p>
           <p>移动设备: {deviceInfo.isMobile ? '是' : '否'}</p>
           <p>设备类型: {deviceInfo.isIPad ? 'iPad' : deviceInfo.isIPhone ? 'iPhone' : '其他'}</p>
+          <p>iOS版本: {deviceInfo.iOSVersion || '未知'}</p>
+          <p className="font-semibold">
+            iOS 17+: {deviceInfo.isIOS17OrAbove ? '是 ✅' : '否 ⚠️'}
+          </p>
+          <p className="text-sm text-gray-400 mt-2">
+            {deviceInfo.isIOS17OrAbove 
+              ? '新版本iOS将默认使用网页播放器，享受新功能' 
+              : '老版本iOS将默认使用系统播放器，确保兼容性'
+            }
+          </p>
         </div>
 
         <div className="mb-6">

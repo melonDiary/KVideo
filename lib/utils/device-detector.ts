@@ -16,6 +16,7 @@ export interface DeviceInfo {
   hasWKWebView: boolean;
   isStandalone: boolean;
   iOSVersion: string | null;
+  isIOS17OrAbove: boolean;
   supportsAirPlay: boolean;
   supportsPictureInPicture: boolean;
   browserName: string;
@@ -57,6 +58,7 @@ export class DeviceDetector {
       hasWKWebView: 'webkit' in window,
       isStandalone: 'standalone' in window.navigator && (window.navigator as any).standalone,
       iOSVersion: this.getiOSVersion(userAgent),
+      isIOS17OrAbove: this.isIOS17OrAbove(userAgent),
       supportsAirPlay: /iPad|iPhone|iPod/.test(userAgent),
       supportsPictureInPicture: document.pictureInPictureEnabled,
       browserName: this.getBrowserName(userAgent),
@@ -82,6 +84,7 @@ export class DeviceDetector {
       hasWKWebView: false,
       isStandalone: false,
       iOSVersion: null,
+      isIOS17OrAbove: false,
       supportsAirPlay: false,
       supportsPictureInPicture: false,
       browserName: 'Unknown',
@@ -103,6 +106,21 @@ export class DeviceDetector {
   private getiOSVersion(userAgent: string): string | null {
     const match = userAgent.match(/OS (\d+)_(\d+)_?(\d+)?/);
     return match ? `${match[1]}.${match[2]}${match[3] ? '.' + match[3] : ''}` : null;
+  }
+
+  /**
+   * 检测是否为iOS 17或更高版本
+   */
+  private isIOS17OrAbove(userAgent: string): boolean {
+    if (!/iPad|iPhone|iPod/.test(userAgent)) {
+      return false;
+    }
+
+    const match = userAgent.match(/OS (\d+)_(\d+)_?(\d+)?/);
+    if (!match) return false;
+
+    const majorVersion = parseInt(match[1]);
+    return majorVersion >= 17;
   }
 
   /**

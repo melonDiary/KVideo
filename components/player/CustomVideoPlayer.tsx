@@ -52,10 +52,16 @@ export function CustomVideoPlayer({
   }, []);
 
   // 决定是否使用iOS播放器
+  // 方案A: 版本自适应策略
+  // iOS 17+: 默认使用iOS播放器（新功能优先）
+  // iOS 16.x及以下: 默认使用网页播放器（兼容性优先）
   const shouldUseIOSPlayer = deviceInfo.isIOS && (
     settings.iosPlayerMode === 'system' || 
     settings.iosPlayerMode === 'safari' ||
-    (settings.iosPlayerMode === 'auto' && settings.preferSystemPlayer)
+    (settings.iosPlayerMode === 'auto' && (
+      deviceInfo.isIOS17OrAbove === true || 
+      (deviceInfo.isIOS17OrAbove === false && settings.preferSystemPlayer)
+    ))
   );
 
   // iOS设备处理

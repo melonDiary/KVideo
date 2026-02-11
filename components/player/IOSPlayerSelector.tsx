@@ -115,6 +115,14 @@ export function IOSPlayerSelector({
             <p className="text-sm text-muted-foreground">
               为您的{deviceInfo.isIPad ? 'iPad' : 'iPhone'}优化的播放器体验
             </p>
+            {/* 版本兼容性提示 */}
+            <div className="mt-2 text-xs text-blue-200/80">
+              {deviceInfo.isIOS17OrAbove ? (
+                <span>✨ iOS 17+ 已优化，支持网页播放器新功能</span>
+              ) : (
+                <span>⚠️ iOS 16.x 推荐使用系统播放器以获得最佳兼容性</span>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-3 justify-center">
