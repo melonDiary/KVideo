@@ -10,6 +10,7 @@ import { PlayerError } from '@/components/player/PlayerError';
 import { SourceSelector, SourceInfo } from '@/components/player/SourceSelector';
 import { useVideoPlayer } from '@/lib/hooks/useVideoPlayer';
 import { useHistory } from '@/lib/store/history-store';
+import { useSafeNavigateBack } from '@/lib/hooks/useSafeNavigateBack';
 import { FavoritesSidebar } from '@/components/favorites/FavoritesSidebar';
 import { FavoriteButton } from '@/components/favorites/FavoriteButton';
 import { PlayerNavbar } from '@/components/player/PlayerNavbar';
@@ -22,6 +23,7 @@ function PlayerContent() {
   const router = useRouter();
   const isPremium = searchParams.get('premium') === '1';
   const { addToHistory } = useHistory(isPremium);
+  const { navigateBack } = useSafeNavigateBack();
 
   const videoId = searchParams.get('id');
   const source = searchParams.get('source');
@@ -164,7 +166,7 @@ function PlayerContent() {
         ) : videoError && !videoData ? (
           <PlayerError
             error={videoError}
-            onBack={() => router.back()}
+            onBack={() => navigateBack('/')}
             onRetry={fetchVideoDetails}
           />
         ) : (
@@ -175,7 +177,7 @@ function PlayerContent() {
                 playUrl={playUrl}
                 videoId={videoId || undefined}
                 currentEpisode={currentEpisode}
-                onBack={() => router.back()}
+                onBack={() => navigateBack('/')}
                 totalEpisodes={videoData?.episodes?.length || 0}
                 onNextEpisode={handleNextEpisode}
                 isReversed={isReversed}
