@@ -304,8 +304,8 @@ export class IOSVideoPlayer {
       return options.allowExternalPlayer ? 'vlc' : 'system';
     }
 
-    // 默认选择系统播放器
-    return 'system';
+    // 默认选择网页播放器而不是系统播放器
+    return 'web';
   }
 
   /**
@@ -339,6 +339,8 @@ export class IOSVideoPlayer {
         return this.launchSystemPlayer(url);
       case 'safari':
         return this.launchSafariPlayer(url);
+      case 'web':
+        return this.launchWebPlayer(url);
       case 'youtube':
         return this.launchYouTubePlayer(url);
       case 'vlc':
@@ -417,6 +419,33 @@ export class IOSVideoPlayer {
         method: 'failed',
         originalUrl: url,
         error: 'Failed to launch Safari player'
+      };
+    }
+  }
+
+  /**
+   * 启动网页播放器
+   */
+  private launchWebPlayer(url: string): PlaybackResult {
+    try {
+      // 触发自定义事件，告诉页面使用网页播放器
+      const event = new CustomEvent('kvideo-play-web-player', {
+        detail: { url: url }
+      });
+      window.dispatchEvent(event);
+
+      return {
+        success: true,
+        method: 'web',
+        player: 'WebPlayer',
+        originalUrl: url
+      };
+    } catch (error) {
+      return {
+        success: false,
+        method: 'failed',
+        originalUrl: url,
+        error: 'Failed to launch web player'
       };
     }
   }
@@ -647,16 +676,16 @@ export class IOSVideoPlayer {
     
     switch (extension) {
       case 'm3u8':
-        return 'system';
+        return this.capabilities?.hasNativeHLS ? 'system' : 'web';
       case 'mp4':
       case 'mov':
       case 'm4v':
-        return 'system';
+        return 'web'; // 默认使用网页播放器
       case 'mkv':
       case 'avi':
         return 'vlc';
       default:
-        return 'safari';
+        return 'web';
     }
   }
 }

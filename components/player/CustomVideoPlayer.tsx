@@ -53,9 +53,9 @@ export function CustomVideoPlayer({
 
   // 决定是否使用iOS播放器
   const shouldUseIOSPlayer = deviceInfo.isIOS && (
-    settings.preferSystemPlayer || 
-    deviceInfo.isMobile || 
-    settings.iosPlayerMode !== 'auto'
+    settings.iosPlayerMode === 'system' || 
+    settings.iosPlayerMode === 'safari' ||
+    (settings.iosPlayerMode === 'auto' && settings.preferSystemPlayer)
   );
 
   // iOS设备处理

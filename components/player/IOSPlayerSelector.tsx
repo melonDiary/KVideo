@@ -247,6 +247,23 @@ export function IOSPlayerSelector({
                   </div>
                 </div>
               </button>
+
+              {/* 网页播放器 */}
+              <button
+                onClick={() => handleIOSPlay('web')}
+                disabled={isLoading}
+                className="p-4 rounded-xl border border-border bg-card text-left hover:bg-accent/10 transition-all duration-200"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">💻</span>
+                  <div className="flex-1">
+                    <div className="font-medium text-white">网页播放器</div>
+                    <p className="text-sm text-muted-foreground">
+                      在当前页面中播放视频，支持更多控制选项
+                    </p>
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
         </Card>

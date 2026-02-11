@@ -149,6 +149,13 @@ export function VideoPlayer({
   const handleVideoError = (error: string) => {
     console.error('Video playback error:', error);
 
+    // 特殊处理：切换到网页播放器的请求
+    if (error === 'switching-to-web') {
+      console.log('切换到网页播放器模式');
+      setVideoError('');
+      return;
+    }
+
     if (!useProxy && proxyMode === 'retry') {
       setUseProxy(true);
       setShouldAutoPlay(true);
@@ -171,6 +178,14 @@ export function VideoPlayer({
   // 处理iOS播放器成功/失败
   const handleIOSPlaySuccess = (result: PlaybackResult) => {
     console.log('iOS播放器成功启动:', result);
+    
+    // 如果选择的是网页播放器，切换回网页播放器
+    if (result.method === 'web') {
+      console.log('用户选择网页播放器，切换到网页播放器');
+      setVideoError('switching-to-web');
+      return;
+    }
+    
     // iOS播放器启动成功，不需要显示错误
     // 可以在这里添加成功提示
   };
@@ -186,10 +201,11 @@ export function VideoPlayer({
     : playUrl;
 
   // 决定使用哪种播放器
+  // 修改：给iOS用户选择权，默认使用网页播放器而不是强制系统播放器
   const shouldUseIOSPlayer = deviceInfo.isIOS && (
-    settings.preferSystemPlayer || 
-    deviceInfo.isMobile || 
-    settings.iosPlayerMode !== 'auto'
+    settings.iosPlayerMode === 'system' || 
+    settings.iosPlayerMode === 'safari' ||
+    (settings.iosPlayerMode === 'auto' && settings.preferSystemPlayer)
   );
 
   if (!playUrl) {

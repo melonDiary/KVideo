@@ -8,7 +8,7 @@
  */
 export interface VideoPlayerOptions {
   forceDownload?: boolean;
-  preferredPlayer?: 'auto' | 'system' | 'safari' | 'vlc' | 'youtube';
+  preferredPlayer?: 'auto' | 'system' | 'safari' | 'web' | 'vlc' | 'youtube';
   enableNativeControls?: boolean;
   allowExternalPlayer?: boolean;
   fallbackToSafari?: boolean;
@@ -31,7 +31,7 @@ export interface VideoInfo {
  */
 export interface PlaybackResult {
   success: boolean;
-  method: 'safari' | 'urlscheme' | 'download' | 'native' | 'failed';
+  method: 'safari' | 'urlscheme' | 'download' | 'native' | 'web' | 'failed';
   player?: string;
   error?: string;
   originalUrl: string;
