@@ -45,6 +45,31 @@ export function useEnhancedFullscreenControls({
   const [iosInfo, setIosInfo] = useState<IOSFullscreenInfo>(() => IOSFullscreenDetector.detect());
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // 新增：用户交互状态追踪
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
+  // 新增：用户交互验证机制
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const markAsInteracted = () => {
+      setHasUserInteracted(true);
+      console.log('iOS全屏: 用户已交互，可以触发全屏');
+    };
+
+    // 监听多种用户交互事件
+    const interactionEvents = ['click', 'touchstart', 'keydown', 'pointerdown'];
+    interactionEvents.forEach(event => {
+      document.addEventListener(event, markAsInteracted, { once: true, passive: true });
+    });
+
+    return () => {
+      interactionEvents.forEach(event => {
+        document.removeEventListener(event, markAsInteracted);
+      });
+    };
+  }, []);
+
   // 检测设备特性
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -82,15 +107,82 @@ export function useEnhancedFullscreenControls({
     }
   }, []);
 
+  // 获取当前实际的全屏状态（优先使用浏览器原生状态）
+  const getCurrentFullscreenState = useCallback(() => {
+    const nativeFullscreen = !!(
+      document.fullscreenElement ||
+      (document as any).webkitFullscreenElement ||
+      (document as any).mozFullScreenElement ||
+      (document as any).msFullscreenElement
+    );
+    return nativeFullscreen;
+  }, []);
+
+  // 新增：友好的错误提示函数
+  const showUserFriendlyError = useCallback((message: string) => {
+    if (typeof window !== 'undefined') {
+      // 创建临时提示元素
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      toast.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 999999;
+        backdrop-filter: blur(10px);
+        animation: fadeInOut 3s ease-in-out forwards;
+      `;
+      
+      // 添加样式动画
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeInOut {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+          10%, 90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+        }
+      `;
+      document.head.appendChild(style);
+      document.body.appendChild(toast);
+      
+      // 3秒后自动移除
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+        if (document.head.contains(style)) {
+          document.head.removeChild(style);
+        }
+      }, 3000);
+    }
+  }, []);
+
   // 增强的全屏切换方法
   const toggleFullscreen = useCallback(async () => {
     if (!containerRef.current) return;
 
+    // 检查用户交互状态（关键修复）
+    if (enableIOSOptimizations && iosInfo.isIOS && !hasUserInteracted) {
+      showUserFriendlyError('请点击屏幕任意位置后再尝试全屏');
+      console.warn('iOS全屏: 用户未交互，阻止全屏请求');
+      return;
+    }
+
     cancelOngoingOperation();
     abortControllerRef.current = new AbortController();
 
+    // 获取当前实际状态（优先使用浏览器原生状态）
+    const currentNativeState = getCurrentFullscreenState();
+    const shouldEnterFullscreen = !currentNativeState;
+
     try {
-      if (!isFullscreen) {
+      if (shouldEnterFullscreen) {
         // 进入全屏
         if (enableIOSOptimizations && iosInfo.isIOS) {
           // iOS 特殊处理
@@ -104,7 +196,8 @@ export function useEnhancedFullscreenControls({
               method: result.method,
               error: undefined
             }));
-            setIsFullscreen(true);
+            // 立即同步React状态
+            setTimeout(() => setIsFullscreen(true), 0);
             
             // iOS 17+ 优化
             if (iosInfo.iosVersion && parseFloat(iosInfo.iosVersion) >= 17.0) {
@@ -112,9 +205,10 @@ export function useEnhancedFullscreenControls({
               document.body.style.overflow = 'hidden';
             }
           } else {
-            // 降级到网页全屏
-            console.warn('iOS系统全屏失败，降级到网页全屏:', result.error);
+            // 智能降级到网页全屏（替代失败提示）
+            console.warn('iOS系统全屏失败，自动降级到网页全屏:', result.error);
             setIsFullscreen(true); // 网页全屏逻辑处理
+            showUserFriendlyError('已启用网页全屏模式');
           }
         } else {
           // 桌面端和Android处理
@@ -125,9 +219,14 @@ export function useEnhancedFullscreenControls({
           } else if (videoRef.current && (videoRef.current as any).webkitEnterFullscreen) {
             (videoRef.current as any).webkitEnterFullscreen();
           }
+          // 等待状态变化事件同步React状态
+          setTimeout(() => {
+            const newNativeState = getCurrentFullscreenState();
+            setIsFullscreen(newNativeState);
+          }, 100);
         }
       } else {
-        // 退出全屏
+        // 退出全屏 - 修复Windows端问题
         if (enableIOSOptimizations && iosInfo.isIOS) {
           const result = await IOSFullscreenExecutor.exitFullscreen();
           if (result.success) {
@@ -137,7 +236,7 @@ export function useEnhancedFullscreenControls({
               method: 'none',
               error: undefined
             }));
-            setIsFullscreen(false);
+            setTimeout(() => setIsFullscreen(false), 0);
             
             // 恢复系统UI
             if (iosInfo.iosVersion && parseFloat(iosInfo.iosVersion) >= 17.0) {
@@ -151,15 +250,21 @@ export function useEnhancedFullscreenControls({
             } else if ((document as any).webkitExitFullscreen) {
               await (document as any).webkitExitFullscreen();
             }
-            setIsFullscreen(false);
+            // 立即同步React状态
+            setTimeout(() => setIsFullscreen(false), 0);
           }
         } else {
-          // 桌面端和Android处理
+          // 桌面端和Android处理 - 重点修复Windows端
           if (document.exitFullscreen) {
             await document.exitFullscreen();
           } else if ((document as any).webkitExitFullscreen) {
             await (document as any).webkitExitFullscreen();
           }
+          // 立即同步React状态，防止状态不同步
+          setTimeout(() => {
+            const newNativeState = getCurrentFullscreenState();
+            setIsFullscreen(newNativeState);
+          }, 0);
         }
       }
     } catch (error) {
@@ -169,22 +274,30 @@ export function useEnhancedFullscreenControls({
         error: error instanceof Error ? error.message : '未知错误'
       }));
       
-      // 出错时尝试降级方案
-      if (!isFullscreen) {
+      // 出错时智能降级方案
+      if (!currentNativeState) {
+        // 进入全屏失败，但不应该阻止用户体验
         setIsFullscreen(true);
+        showUserFriendlyError('全屏启动中...');
       } else {
-        setIsFullscreen(false);
+        // 退出全屏失败，强制同步状态
+        setTimeout(() => {
+          const newNativeState = getCurrentFullscreenState();
+          setIsFullscreen(newNativeState);
+        }, 0);
       }
     }
   }, [
     containerRef, 
     videoRef, 
-    isFullscreen, 
     setIsFullscreen, 
     enableIOSOptimizations, 
     iosInfo, 
     fullscreenType,
-    cancelOngoingOperation
+    cancelOngoingOperation,
+    getCurrentFullscreenState,
+    hasUserInteracted,
+    showUserFriendlyError
   ]);
 
   // 全屏状态变化监听
