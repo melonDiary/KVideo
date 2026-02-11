@@ -19,6 +19,10 @@ interface IOSFullscreenVideoPlayerProps {
   onError?: (error: string) => void;
   onSuccess?: (result: PlaybackResult) => void;
   options?: VideoPlayerOptions;
+  totalEpisodes?: number;
+  currentEpisodeIndex?: number;
+  onNextEpisode?: () => void;
+  isReversed?: boolean;
 }
 
 export function IOSFullscreenVideoPlayer({
@@ -28,7 +32,11 @@ export function IOSFullscreenVideoPlayer({
   onBack,
   onError,
   onSuccess,
-  options = {}
+  options = {},
+  totalEpisodes,
+  currentEpisodeIndex,
+  onNextEpisode,
+  isReversed = false
 }: IOSFullscreenVideoPlayerProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -469,6 +477,24 @@ export function IOSFullscreenVideoPlayer({
               <line x1="12" y1="17" x2="12" y2="21"/>
             </svg>
           </button>
+          
+          {/* 新增：播放下一集按钮 */}
+          {onNextEpisode && totalEpisodes && currentEpisodeIndex !== undefined && (
+            <button
+              onClick={() => {
+                console.log('手动播放下一集');
+                onNextEpisode();
+              }}
+              className="ios-touch-optimized p-3 bg-green-600/80 hover:bg-green-700 text-white rounded-lg backdrop-blur-sm transition-all duration-200"
+              title={`播放下一集 (${currentEpisodeIndex + 1}/${totalEpisodes})`}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="5,3 19,12 5,21"/>
+                <line x1="19" y1="12" x2="22" y2="12"/>
+              </svg>
+            </button>
+          )}
+          
           <button
             onClick={enterFullscreen}
             disabled={isLoading}
@@ -483,16 +509,35 @@ export function IOSFullscreenVideoPlayer({
       )}
       
       {isFullscreen && (
-        <button
-          onClick={exitFullscreen}
-          disabled={isLoading}
-          className="ios-touch-optimized p-3 bg-black/50 hover:bg-black/70 text-white rounded-lg backdrop-blur-sm transition-all duration-200"
-          title="退出全屏"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
-          </svg>
-        </button>
+        <div className="flex gap-2">
+          {/* 全屏模式下的播放下一集按钮 */}
+          {onNextEpisode && totalEpisodes && currentEpisodeIndex !== undefined && (
+            <button
+              onClick={() => {
+                console.log('全屏模式下播放下一集');
+                onNextEpisode();
+              }}
+              className="ios-touch-optimized p-3 bg-green-600/80 hover:bg-green-700 text-white rounded-lg backdrop-blur-sm transition-all duration-200"
+              title={`播放下一集 (${currentEpisodeIndex + 1}/${totalEpisodes})`}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="5,3 19,12 5,21"/>
+                <line x1="19" y1="12" x2="22" y2="12"/>
+              </svg>
+            </button>
+          )}
+          
+          <button
+            onClick={exitFullscreen}
+            disabled={isLoading}
+            className="ios-touch-optimized p-3 bg-black/50 hover:bg-black/70 text-white rounded-lg backdrop-blur-sm transition-all duration-200"
+            title="退出全屏"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
+            </svg>
+          </button>
+        </div>
       )}
       
       {onBack && (

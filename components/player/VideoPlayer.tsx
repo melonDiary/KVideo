@@ -252,6 +252,11 @@ export function VideoPlayer({
             enableNativeControls: true,
             allowExternalPlayer: true
           }}
+          // 传递自动播放下一集参数
+          totalEpisodes={totalEpisodes}
+          currentEpisodeIndex={currentEpisode}
+          onNextEpisode={onNextEpisode}
+          isReversed={isReversed}
         />
       ) : (
         // 使用网页播放器
